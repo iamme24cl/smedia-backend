@@ -49,7 +49,7 @@ const Navbar = () => {
     }
 
   return (
-    <AppBar position='stick'>
+    <AppBar position='sticky'>
         <StyledToolbar>
             <Typography variant='h6' sx={{ display: {xs:"none", sm:"block"}}}>sMedia</Typography>
             <NewspaperIcon sx={{ display: {xs:"block", sm:"none"}}} />
