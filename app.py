@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_socketio import SocketIO
 from db import init_db
 from config import config
 
@@ -14,10 +15,26 @@ app.config.from_object(config[env])
 # Initialize extensions
 CORS(app)
 jwt = JWTManager(app)
+socketio = SocketIO(app, cors_allowed_origins="*") # Initialize SocketIO
 
 # Initialize the database
 init_db()
 
+# Import and Register blueprints
+from resources.user_resource import user_bp
+from resources.post_resource import post_bp
+from resources.comment_resource import comment_bp
+from resources.like_resource import like_bp
+from resources.auth_resource import auth_bp
+from resources.message_resource import message_bp
+
+app.register_blueprint(user_bp, url_prefix='/api/users')
+app.register_blueprint(post_bp, url_prefix='/api/posts')
+app.register_blueprint(comment_bp, url_prefix='/api/comments')
+app.register_blueprint(like_bp, url_prefix='/api/likes')
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
+app.register_blueprint(message_bp, url_prefix='/api/messages')  
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True) # Run with SocketIO
