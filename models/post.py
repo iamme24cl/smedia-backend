@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from db import Base
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Post(Base):
     __tablename__ = 'posts'
@@ -9,7 +9,7 @@ class Post(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     content = Column(Text, nullable=False)
     image = Column(String)
-    timestamp = Column(DateTime, default=datetime.now(datetime.utc))
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user = relationship('User', back_populates='posts')
     comments = relationship('Comment', back_populates='post')
     likes = relationship('Like', back_populates='post')
