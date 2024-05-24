@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_req
 from db import session
 from models.message import Message
 from flask_socketio import emit, join_room, leave_room
-from app import socketio
+from extensions import socketio
 
 message_bp = Blueprint('message_bp', __name__)
 
