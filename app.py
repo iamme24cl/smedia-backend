@@ -5,7 +5,7 @@ from db import init_db
 from config import config
 from extensions import socketio, jwt
 
-def craete_app():
+def create_app():
     app = Flask(__name__)
 
     # Set the configuration based on the environment
@@ -39,5 +39,5 @@ def craete_app():
 
 
 if __name__ == '__main__':
-    app = craete_app()
+    app = create_app()
     socketio.run(app, debug=True) # Run with SocketIO
