@@ -21,6 +21,14 @@ def create_post():
     session.commit()
     return jsonify({'message': 'Post successfully created', 'post': post.to_dict()}), 201
 
+@post_bp.route('/', methods=['GET'])
+@jwt_required()
+def get_posts():
+    posts = session.query(Post).all()
+    if len(posts) > 0:
+        return jsonify([post.to_dict() for post in posts]), 200
+    return jsonify({'message': 'No posts found'}), 200
+
 @post_bp.route('/<int:post_id>', methods=['GET'])
 @jwt_required()
 def get_post(post_id):
