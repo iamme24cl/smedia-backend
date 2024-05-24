@@ -1,72 +1,88 @@
-import random
-from faker import Faker
-from flask import session
-
-from models.like import Like
-from models.post import Post
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from models.user import User
+from models.post import Post
 from models.comment import Comment
+from models.like import Like
+from models.message import Message
+from faker import Faker
+from db import Base
+
+# Create a new engine instance
+engine = create_engine('sqlite:///smedia.db')
+
+# Create a configured "Session" class
+Session = sessionmaker(bind=engine)
+
+# Create a session
+session = Session()
 
 fake = Faker()
 
-def generate_fake_data(num_users=10, num_posts=30, num_comments=50, num_likes=100):
-    users = []
-    posts = []
-    comments = []
-    likes = []
-
-    for _ in range(num_users):
+def generate_fake_data():
+    # Generate users
+    for _ in range(10):
         user = User(
             name=fake.name(),
             username=fake.user_name(),
             email=fake.email(),
-            password=fake.password(),  # Generate a fake password
+            password=fake.password(),
             avatar=fake.image_url(),
-            bio=fake.text(max_nb_chars=100),
+            bio=fake.text(),
             location=fake.city(),
-            joined_at=fake.date_this_decade()
+            joined_at=fake.date_time_this_decade()
         )
-        users.append(user)
         session.add(user)
+        session.commit()  # Commit after adding each user to get user.id
 
-    session.commit()
-
-    for _ in range(num_posts):
+    # Generate posts
+    for _ in range(30):
         post = Post(
-            user_id=random.choice(users).id,
-            content=fake.text(max_nb_chars=200),
+            user_id=fake.random_int(min=1, max=10),
+            content=fake.text(),
             image=fake.image_url(),
-            likes=random.randint(0, 1000),
-            comments=random.randint(0, 100),
-            created_at=fake.date_time_this_year()
+            timestamp=fake.date_time_this_year()
         )
-        posts.append(post)
         session.add(post)
+        session.commit()  # Commit after adding each post to get post.id
 
-    session.commit()
-
-    for _ in range(num_comments):
+    # Generate comments
+    for _ in range(50):
         comment = Comment(
-            post_id=random.choice(posts).id,
-            user_id=random.choice(users).id,
-            content=fake.text(max_nb_chars=100),
-            created_at=fake.date_time_this_year()
+            post_id=fake.random_int(min=1, max=30),
+            user_id=fake.random_int(min=1, max=10),
+            content=fake.text(),
+            timestamp=fake.date_time_this_year()
         )
-        comments.append(comment)
         session.add(comment)
+        session.commit()
 
-    session.commit()
-
-    for _ in range(num_likes):
+    # Generate likes
+    for _ in range(100):
         like = Like(
-            post_id=random.choice(posts).id,
-            user_id=random.choice(users).id,
-            created_at=fake.date_time_this_year()
+            post_id=fake.random_int(min=1, max=30),
+            user_id=fake.random_int(min=1, max=10),
+            timestamp=fake.date_time_this_year()
         )
-        likes.append(like)
         session.add(like)
+        session.commit()
 
-    session.commit()
-    
-if __name__ == '__main__':
+    # Generate messages
+    for _ in range(20):
+        message = Message(
+            sender_id=fake.random_int(min=1, max=10),
+            recipient_id=fake.random_int(min=1, max=10),
+            content=fake.text(),
+            timestamp=fake.date_time_this_year(),
+            read=fake.boolean()
+        )
+        session.add(message)
+        session.commit()
+
+if __name__ == "__main__":
+    # Initialize the database (if not already initialized)
+    Base.metadata.create_all(engine)
     generate_fake_data()
+
+    # Close the session
+    session.close()
