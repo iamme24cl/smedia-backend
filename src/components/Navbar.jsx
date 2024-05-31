@@ -4,6 +4,7 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import MailIcon from '@mui/icons-material/Mail';
 import { Notifications } from '@mui/icons-material';
 import MenuItem from '@mui/material/MenuItem';
+import { useNavigate } from 'react-router-dom';
 
 const StyledToolbar = styled(Toolbar)({
     display: "flex",
@@ -36,16 +37,21 @@ const UserBox = styled(Box)(({ theme }) => ({
 }));
 
 
-const Navbar = () => {
+const Navbar = ({ user }) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
+    const navigate = useNavigate();
     
     const handleClick = (e) => {
         setAnchorEl(e.currentTarget);
     };
 
-    const handleClose = () => {
+    const handleClose = (action) => {
         setAnchorEl(null);
+        if (action === 'logout') {
+            localStorage.removeItem('smedia-token');
+            navigate('/logout');
+        }
     }
 
   return (
@@ -61,10 +67,10 @@ const Navbar = () => {
                 <Badge badgeContent={2} color='error'>
                     <Notifications />
                 </Badge>
-                <Avatar onClick={e => handleClick(e)} sx={{ width: 30, height: 30, cursor: "pointer" }} src='https://randomuser.me/api/portraits/thumb/men/75.jpg' />
+                <Avatar onClick={e => handleClick(e)} sx={{ width: 30, height: 30, cursor: "pointer" }} src={user.avatar} />
             </Icons>
             <UserBox>
-                <Avatar onClick={e => handleClick(e)} sx={{ width: 30, height: 30, cursor: "pointer" }} src='https://randomuser.me/api/portraits/thumb/men/75.jpg' />
+                <Avatar onClick={e => handleClick(e)} sx={{ width: 30, height: 30, cursor: "pointer" }} src={user.avatar} />
             </UserBox>
         </StyledToolbar>
         <Menu
@@ -82,9 +88,9 @@ const Navbar = () => {
             horizontal: 'right',
             }}
         >
-            <MenuItem onClick={handleClose}>Profile</MenuItem>
-            <MenuItem onClick={handleClose}>My account</MenuItem>
-            <MenuItem onClick={handleClose}>Logout</MenuItem>
+            <MenuItem onClick={() => handleClose()}>Profile</MenuItem>
+            <MenuItem onClick={() => handleClose()}>My account</MenuItem>
+            <MenuItem onClick={() => handleClose('logout')}>Logout</MenuItem>
         </Menu>
     </AppBar>
   );
