@@ -1,13 +1,19 @@
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Feed from "./components/Feed";
 import Rightbar from "./components/Rightbar";
 import Add from "./components/Add";
-import { Box, Stack, createTheme, ThemeProvider } from "@mui/material";
-import { useState } from "react";
+import Login from "./components/Login";
+import Logout from "./components/Logout";
+import { Box, Stack, createTheme, ThemeProvider, CircularProgress } from "@mui/material";
 
 function App() {
   const [mode, setMode] = useState("light");
+  const [auth, setAuth] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState({});
 
   const darkTheme = createTheme({
     palette: {
@@ -15,16 +21,55 @@ function App() {
     }
   })
 
+  useEffect(() => {
+    const token = localStorage.getItem('smedia-token');
+    if (token) {
+      console.log(token)
+      setAuth(true);
+    }
+    setLoading(false);
+  }, [])
+
+  if (loading) {
+    console.log("loading....")
+    return (
+      <Box display={"flex"} justifyContent={"center"} alignItems={"center"} minHeight={"100vh"}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <ThemeProvider theme={darkTheme}>
       <Box bgcolor={"background.default"} color={"text.primary"}>
-        <Navbar />
-        <Stack direction={"row"} spacing={2} justifyContent={"space-between"}>
-          <Sidebar mode={mode} setMode={setMode} />
-          <Feed />
-          <Rightbar />
-        </Stack>
-        <Add />
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login setAuth={setAuth} setUser={setUser} />}/>
+            <Route path="/logout" element={<Logout setAuth={setAuth} />}/>
+            <Route 
+              path="/"
+              element={
+                auth ? (
+                  <>
+                    {console.log("Rendering authenticated routes")}
+                    <Navbar user={user} />
+                    <Stack direction={"row"} spacing={2} justifyContent={"space-between"}>
+                      <Sidebar mode={mode} setMode={setMode} />
+                      <Feed user={user} />
+                      <Rightbar />
+                    </Stack>
+                    <Add />
+                  </>
+                ) : (
+                  <>
+                    {console.log("Navigating to login")}
+                    <Navigate to={"/login"} />
+                  </>
+                )
+              }
+            />
+          </Routes>
+        </Router>
       </Box>
     </ThemeProvider>
   );
