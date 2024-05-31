@@ -3,10 +3,11 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import SQLAlchemyError
 from db import session
 from models.post import Post
+from models.like import Like
 
 post_bp = Blueprint('post_bp', __name__)
 
-@post_bp.route('/', methods=['POST'])
+@post_bp.route('/', methods=['POST'], endpoint='create_post')
 @jwt_required()
 def create_post():
     data = request.json
@@ -25,7 +26,7 @@ def create_post():
         session.rollback()
         return jsonify({'message': 'Creating post failed.','error': str(e)}), 500
 
-@post_bp.route('/', methods=['GET'])
+@post_bp.route('/', methods=['GET'], endpoint='get_posts')
 @jwt_required()
 def get_posts():
     try:
@@ -36,7 +37,7 @@ def get_posts():
     except SQLAlchemyError as e:
         return jsonify({'message': 'Getting posts failed.', 'error': str(e)}), 500
 
-@post_bp.route('/<int:post_id>', methods=['GET'])
+@post_bp.route('/<int:post_id>', methods=['GET'], endpoint='get_post')
 @jwt_required()
 def get_post(post_id):
     try:
@@ -47,7 +48,7 @@ def get_post(post_id):
     except SQLAlchemyError as e:
         return jsonify({'message': 'Getting post failed.', 'error': str(e)}), 500
 
-@post_bp.route('/<int:post_id>', methods=['PUT'])
+@post_bp.route('/<int:post_id>', methods=['PUT'], endpoint='update_post')
 @jwt_required()
 def update_post(post_id):
     data = request.json
@@ -63,8 +64,8 @@ def update_post(post_id):
         session.rollback()
         return jsonify({'message': 'Updating post failed.', 'error': str(e)}), 500
     
-@post_bp.route('/<int:post_id>', methods=['DELETE'])
-@jwt_required
+@post_bp.route('/<int:post_id>', methods=['DELETE'], endpoint='delete_post')
+@jwt_required()
 def delete_post(post_id):
     try:
         post = session.query(Post).get(post_id)
@@ -76,4 +77,31 @@ def delete_post(post_id):
     except SQLAlchemyError as e:
         session.rollback()
         return jsonify({'message': 'Deleting post failed.', 'error': str(e)}), 500
-                
+    
+@post_bp.route('/<int:post_id>/like', methods=['POST'], endpoint='add_post_like')
+@jwt_required()
+def add_post_like(post_id):
+    user_id = get_jwt_identity()
+    try:
+        like = Like(user_id=user_id, post_id=post_id)
+        session.add(like)
+        session.commit()
+        return jsonify({'message': 'Successfully liked post.'}), 200
+    except SQLAlchemyError as e:
+        session.rollback()
+        return jsonify({'message': 'Cannot add like.', 'error': str(e)}), 500
+    
+@post_bp.route('/<int:post_id>/like', methods=['DELETE'], endpoint='delete_post_like')
+@jwt_required()
+def delete_post_like(post_id):
+    user_id = get_jwt_identity()
+    try:
+        like = session.query(Like).filter_by(post_id=post_id, user_id=user_id).first()
+        if like:
+            session.delete(like)
+            session.commit()
+            return jsonify({'message': 'Like successfully deleted.'}), 200
+        return jsonify({'message': 'Like not found.'}), 404
+    except SQLAlchemyError as e:
+        session.rollback()
+        return jsonify({'message': 'Deleting like failed.', 'error': str(e)}), 500
