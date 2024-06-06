@@ -83,6 +83,10 @@ def delete_post(post_id):
 def add_post_like(post_id):
     user_id = get_jwt_identity()
     try:
+        existing_like = session.query(Like).filter_by(post_id=post_id, user_id=user_id).first()
+        if existing_like:
+            return jsonify({'message': 'Post already liked.'}), 400
+        
         like = Like(user_id=user_id, post_id=post_id)
         session.add(like)
         session.commit()

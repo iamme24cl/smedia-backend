@@ -13,9 +13,9 @@ def create_app():
     app.config.from_object(config[env])
 
     # Initialize extensions
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
     jwt.init_app(app)
-    socketio.init_app(app) # Initialize SocketIO
+    socketio.init_app(app)  # Initialize SocketIO
 
     # Initialize the database
     init_db()
@@ -37,7 +37,6 @@ def create_app():
     
     return app
 
-
 if __name__ == '__main__':
     app = create_app()
-    socketio.run(app, debug=True) # Run with SocketIO
+    socketio.run(app, debug=True)  # Run with SocketIO
