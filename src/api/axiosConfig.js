@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
     response => response,
     error => {
-        if (error.response && error.respose.status === 401) {
+        if (error.response && error.response.status === 401) {
             // Token has expired or unauthorized, direct to logout component
             window.location.href = '/logout';
         }

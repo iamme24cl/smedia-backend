@@ -13,7 +13,7 @@ function App() {
   const [mode, setMode] = useState("light");
   const [auth, setAuth] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState(null);
 
   const darkTheme = createTheme({
     palette: {
@@ -26,6 +26,11 @@ function App() {
     if (token) {
       console.log(token)
       setAuth(true);
+
+      const storedUser = JSON.parse(localStorage.getItem('smedia-user'));
+      if (storedUser) {
+        setUser(storedUser);
+      }
     }
     setLoading(false);
   }, [])

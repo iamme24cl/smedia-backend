@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { Box, Button, TextField, Typography, Container, Paper } from "@mui/material";
 import login from "../api/authApi";
@@ -22,6 +21,7 @@ const Login = ({ setAuth, setUser }) => {
         try {
             const data = await login(formData);
             localStorage.setItem('smedia-token', data.access_token);
+            localStorage.setItem('smedia-user', JSON.stringify(data.user)); // Store user object in localStorage
             setAuth(true);
             setUser(data.user)
             navigate('/');

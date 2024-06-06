@@ -6,6 +6,7 @@ const Logout = ({ setAuth }) => {
 
     useEffect(() => {
         localStorage.removeItem('smedia-token');
+        localStorage.removeItem('smedia-user');
         setAuth(false);
         navigate('/login');
     }, [navigate, setAuth]);
